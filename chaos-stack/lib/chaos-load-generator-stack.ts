@@ -55,6 +55,7 @@ export class ChaosLoadGeneratorStack extends cdk.Stack {
       userData: ec2.UserData.custom(`
         #!/bin/bash
         yum update -y
+        yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm && systemctl enable amazon-ssm-agent && systemctl start amazon-ssm-agent
         rpm -ivh https://github.com/nakabonne/ali/releases/download/v0.5.4/ali_0.5.4_linux_amd64.rpm
         mkdir -p /root/ali && cd /root/ali
         echo "ali --rate=2000 --duration=0 http://${props.productCompositeAlbDnsName}/product-composites/product-001" > execute.sh && chmod 744 ./execute.sh
