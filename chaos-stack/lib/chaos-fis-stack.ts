@@ -36,8 +36,8 @@ export class ChaosFisStack extends cdk.Stack {
           actionId: 'aws:ssm:send-command',
           parameters: {
               documentArn: "arn:aws:ssm:us-east-1::document/AWSFIS-Run-CPU-Stress",
-              documentParameters: "{\"DurationSeconds\":\"180\", \"InstallDependencies\":\"True\"}",
-              duration: 'PT3M',
+              documentParameters: "{\"DurationSeconds\":\"300\", \"InstallDependencies\":\"True\"}",
+              duration: 'PT5M',
           },
           targets: { Instances: 'targetInstances' },
       };
@@ -111,8 +111,8 @@ export class ChaosFisStack extends cdk.Stack {
           actionId: 'aws:ssm:send-command',
           parameters: {
               documentArn: "arn:aws:ssm:us-east-1::document/AWSFIS-Run-Network-Latency",
-              documentParameters: "{\"DelayMilliseconds\": \"500\", \"Interface\": \"eth0\", \"DurationSeconds\":\"120\", \"InstallDependencies\":\"True\"}",
-              duration: 'PT3M',
+              documentParameters: "{\"DelayMilliseconds\": \"500\", \"Interface\": \"eth0\", \"DurationSeconds\":\"300\", \"InstallDependencies\":\"True\"}",
+              duration: 'PT5M',
           },
           targets: { Instances: 'targetInstances' }
       };
