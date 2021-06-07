@@ -2,6 +2,7 @@ package com.skipio.demo.chaos.fis.review;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.RandomUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -36,6 +37,7 @@ public class ReviewController {
 
     @GetMapping("/products/{productId}/reviews")
     public List<Review> getReviews(@PathVariable String productId){
+        sleep(50 + RandomUtils.nextInt(51));
         List<Review> reviews = new ArrayList<>();
         reviews.addAll(productReviewMap.get(productId).values());
 
@@ -44,6 +46,15 @@ public class ReviewController {
 
     @GetMapping("/products/{productId}/reviews/{reviewId}")
     public Review getReview(@PathVariable String productId, @PathVariable String reviewId){
+        sleep(50 + RandomUtils.nextInt(51));
         return productReviewMap.get(productId).get(reviewId);
+    }
+
+    private void sleep(long milliseconds){
+        try {
+            Thread.sleep(milliseconds);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
 @RestController
@@ -26,6 +27,7 @@ public class ProductController {
 
     @GetMapping("/products")
     public List<Product> getProducts(){
+        sleep(50 + RandomUtils.nextInt(51));
         List<Product> products = new ArrayList<>();
         products.addAll(productMap.values());
 
@@ -34,6 +36,16 @@ public class ProductController {
 
     @GetMapping("/products/{productId}")
     public Product getProducts(@PathVariable String productId){
+        sleep(50 + RandomUtils.nextInt(51));
         return productMap.get(productId);
+    }
+
+
+    private void sleep(long milliseconds){
+        try {
+            Thread.sleep(milliseconds);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

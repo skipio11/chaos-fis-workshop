@@ -37,6 +37,7 @@ public class RecommendationController {
 
     @GetMapping("/products/{productId}/recommendations")
     public List<Recommendation> getRecommendations(@PathVariable String productId){
+        sleep(50 + RandomUtils.nextInt(51));
         List<Recommendation> recommendations = new ArrayList<>();
         recommendations.addAll(productRecommendationMap.get(productId).values());
 
@@ -45,6 +46,15 @@ public class RecommendationController {
 
     @GetMapping("/products/{productId}/recommendations/{recommendationId}")
     public Recommendation getRecommendation(@PathVariable String productId, @PathVariable String recommendationId){
+        sleep(50 + RandomUtils.nextInt(51));
         return productRecommendationMap.get(productId).get(recommendationId);
+    }
+
+    private void sleep(long milliseconds){
+        try {
+            Thread.sleep(milliseconds);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
