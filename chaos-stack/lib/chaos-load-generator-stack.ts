@@ -20,8 +20,8 @@ export class ChaosLoadGeneratorStack extends cdk.Stack {
       description: '',
       allowAllOutbound: true   // Can be set to false
     });
-    securityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(3389), 'Allow RDP from internet');
-    securityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(22), 'Allow SSH from internet');
+    //securityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(3389), 'Allow RDP from internet');
+    //securityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(22), 'Allow SSH from internet');
 
     const ec2Role = new iam.Role(this, "ec2Role", {
           assumedBy: new iam.ServicePrincipal("ec2.amazonaws.com"),
@@ -60,12 +60,12 @@ export class ChaosLoadGeneratorStack extends cdk.Stack {
         yum update -y
         yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm && systemctl enable amazon-ssm-agent && systemctl start amazon-ssm-agent
         yum install -y jq gcc lua-devel git
-        #wrk
-        git clone https://github.com/wg/wrk.git && cd wrk && make
+        # wrk install
+        cd /root/ && git clone https://github.com/wg/wrk.git && cd wrk && make
         cp ./wrk /usr/local/bin/
-        echo "wrk -t 128 -c 512 -d 180m http://${props.productCompositeAlbDnsName}/product-composites/product-001 &" > start-wrk.sh && chmod 744 ./start-wrk.sh
+        echo "wrk -t 128 -c 512 -d 360m http://${props.productCompositeAlbDnsName}/product-composites/product-001 &" > start-wrk.sh && chmod 744 ./start-wrk.sh
         ./start-wrk.sh
-        #ali
+        # ali install
         mkdir -p /root/ali && cd /root/ali
         rpm -ivh https://github.com/nakabonne/ali/releases/download/v0.7.2/ali_0.7.2_linux_amd64.rpm
         echo "ali -r 2000 -d 0 -t 10s http://${props.productCompositeAlbDnsName}/product-composites/product-001" > execute-ali.sh && chmod 744 ./execute-ali.sh

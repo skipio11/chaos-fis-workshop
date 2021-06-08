@@ -33,9 +33,9 @@ public class AppConfig {
 
         RequestConfig requestConfig = RequestConfig
                 .custom()
-                .setConnectionRequestTimeout(10000) // timeout to get connection from pool
-                .setSocketTimeout(10000) // standard connection timeout
-                .setConnectTimeout(10000) // standard connection timeout
+                .setConnectionRequestTimeout(3000) // timeout to get connection from pool
+                .setSocketTimeout(3000) // standard connection timeout
+                .setConnectTimeout(3000) // standard connection timeout
                 .build();
         return org.apache.http.impl.client.HttpClientBuilder.create()
                 .setConnectionManager(connectionManager)

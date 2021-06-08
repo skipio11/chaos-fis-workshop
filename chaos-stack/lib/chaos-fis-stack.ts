@@ -30,28 +30,28 @@ export class ChaosFisStack extends cdk.Stack {
     this.createFisTemplateForNetwork(fisRole, chaosSteadyStateAlarm);
   }
 
-    createChaosSteadyStateAlarm(albName: string, targetGroupName: string) : cw.Alarm {
-      const chaosSteadyStateAlarm = new cw.Alarm(this, 'chaosSteadyStateAlarm', {
-          alarmName: 'chaosSteadyStateAlarm',
-          metric: new cw.Metric({
-              metricName: 'TargetResponseTime',
-              namespace: 'AWS/ApplicationELB',
-              dimensions: {
-                  'LoadBalancer': albName,
-                  'TargetGroup': targetGroupName
-              },
-              statistic: 'p90',
-          }).with( {
-              period: cdk.Duration.seconds(60)
-          }),
-          threshold: 1,
-          evaluationPeriods: 2,
-          treatMissingData: cw.TreatMissingData.MISSING,
-          comparisonOperator: cw.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-          datapointsToAlarm: 2,
-      });
+  createChaosSteadyStateAlarm(albName: string, targetGroupName: string) : cw.Alarm {
+    const chaosSteadyStateAlarm = new cw.Alarm(this, 'chaosSteadyStateAlarm', {
+        alarmName: 'chaosSteadyStateAlarm',
+        metric: new cw.Metric({
+            metricName: 'TargetResponseTime',
+            namespace: 'AWS/ApplicationELB',
+            dimensions: {
+                'LoadBalancer': albName,
+                'TargetGroup': targetGroupName
+            },
+            statistic: 'p90',
+        }).with( {
+            period: cdk.Duration.seconds(60)
+        }),
+        threshold: 1,
+        evaluationPeriods: 2,
+        treatMissingData: cw.TreatMissingData.MISSING,
+        comparisonOperator: cw.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+        datapointsToAlarm: 2,
+    });
 
-      return chaosSteadyStateAlarm;
+    return chaosSteadyStateAlarm;
   }
 
   createFisTemplateForCPUAttack(fisRole: iam.Role, alarm: cw.Alarm) : void {
@@ -136,7 +136,7 @@ export class ChaosFisStack extends cdk.Stack {
           actionId: 'aws:ssm:send-command',
           parameters: {
               documentArn: "arn:aws:ssm:us-east-1::document/AWSFIS-Run-Network-Latency",
-              documentParameters: "{\"DelayMilliseconds\": \"500\", \"Interface\": \"eth0\", \"DurationSeconds\":\"300\", \"InstallDependencies\":\"True\"}",
+              documentParameters: "{\"DelayMilliseconds\": \"5000\", \"Interface\": \"eth0\", \"DurationSeconds\":\"300\", \"InstallDependencies\":\"True\"}",
               duration: 'PT5M',
           },
           targets: { Instances: 'targetInstances' }

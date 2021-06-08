@@ -14,7 +14,7 @@ public class ProductService {
         this.restTemplate = restTemplate;
     }
 
-    // @CircuitBreaker(name = "product", fallbackMethod = "fallback")
+    @CircuitBreaker(name = "product", fallbackMethod = "fallback")
     public ProductComposite.Product getProduct(String productId){
         ProductComposite.Product product = restTemplate.getForObject("http://product/products/"+productId, ProductComposite.Product.class);
         return product;

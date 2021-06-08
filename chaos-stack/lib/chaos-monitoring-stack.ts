@@ -28,18 +28,36 @@ export class ChaosMonitoringStack extends cdk.Stack {
         this.createAsgWidget('recommendation', 'CPUUtilization', props.recommendationAsg.autoScalingGroupName),
         this.createAsgWidget('review', 'CPUUtilization', props.reviewAsg.autoScalingGroupName),
         // this.createAsgWidget('eureka', 'CPUUtilization', props.eurekaAsg.autoScalingGroupName),
-        this.createAlbWidget('product-composite', 'RequestCount', props.productCompositeAlb.loadBalancerFullName, props.productCompositeListenerTarget.targetGroupFullName),
-        this.createAlbWidget('product-composite', 'HTTPCode_ELB_5XX_Count', props.productCompositeAlb.loadBalancerFullName, props.productCompositeListenerTarget.targetGroupFullName),
-        // this.createAlbWidget('product-composite', 'HTTPCode_ELB_3XX_Count', props.productCompositeAlb.loadBalancerFullName, props.productCompositeListenerTarget.targetGroupFullName),
-        // this.createAlbWidget('product-composite', 'HTTPCode_ELB_4XX_Count', props.productCompositeAlb.loadBalancerFullName, props.productCompositeListenerTarget.targetGroupFullName),
-        this.createAlbWidget('product-composite', 'TargetResponseTime', props.productCompositeAlb.loadBalancerFullName, props.productCompositeListenerTarget.targetGroupFullName, 'avg'),
-        this.createAlbWidget('product-composite', 'TargetResponseTime', props.productCompositeAlb.loadBalancerFullName, props.productCompositeListenerTarget.targetGroupFullName, 'p90'),
+        this.createAlbWidget('product-composite', 'RequestCount', props.productCompositeAlb.loadBalancerFullName),
+        this.createAlbWidget('product-composite', 'HTTPCode_ELB_5XX_Count', props.productCompositeAlb.loadBalancerFullName),
+        // this.createAlbWidget('product-composite', 'HTTPCode_ELB_3XX_Count', props.productCompositeAlb.loadBalancerFullName),
+        // this.createAlbWidget('product-composite', 'HTTPCode_ELB_4XX_Count', props.productCompositeAlb.loadBalancerFullName),
+        this.createAlbWithTargetGroupWidget('product-composite', 'TargetResponseTime', props.productCompositeAlb.loadBalancerFullName, props.productCompositeListenerTarget.targetGroupFullName, 'avg'),
+        this.createAlbWithTargetGroupWidget('product-composite', 'TargetResponseTime', props.productCompositeAlb.loadBalancerFullName, props.productCompositeListenerTarget.targetGroupFullName, 'p90'),
         // this.createAlbWidget('product-composite', 'TargetResponseTime', props.productCompositeAlb.loadBalancerFullName, props.productCompositeListenerTarget.targetGroupFullName, 'p95'),
         // this.createAlbWidget('product-composite', 'TargetResponseTime', props.productCompositeAlb.loadBalancerFullName, props.productCompositeListenerTarget.targetGroupFullName, 'p99'),
     );
   }
 
-  createAlbWidget(serviceName: string, metricName: string, albName: string, targetGroupName: string, statistic: string = 'sum', namespace: string = 'AWS/ApplicationELB') : cw.GraphWidget {
+  createAlbWidget(serviceName: string, metricName: string, albName: string, statistic: string = 'sum', namespace: string = 'AWS/ApplicationELB') : cw.GraphWidget {
+    return new cw.GraphWidget({
+      title: serviceName + '/' + metricName + '/' + statistic,
+      width: 12,
+      left: [
+        new cw.Metric({
+          namespace: namespace,
+          metricName: metricName,
+          dimensions: {
+            'LoadBalancer': albName
+          },
+          statistic: statistic,
+          period: cdk.Duration.seconds(1)
+        }),
+      ]
+    })
+  }
+  
+  createAlbWithTargetGroupWidget(serviceName: string, metricName: string, albName: string, targetGroupName: string, statistic: string = 'sum', namespace: string = 'AWS/ApplicationELB') : cw.GraphWidget {
     return new cw.GraphWidget({
       title: serviceName + '/' + metricName + '/' + statistic,
       width: 12,
@@ -52,7 +70,7 @@ export class ChaosMonitoringStack extends cdk.Stack {
             'TargetGroup': targetGroupName
           },
           statistic: statistic,
-          period: cdk.Duration.minutes(1)
+          period: cdk.Duration.seconds(1)
         }),
       ]
     })
@@ -69,7 +87,7 @@ export class ChaosMonitoringStack extends cdk.Stack {
           'AutoScalingGroupName': asgName,
         },
         statistic: statistic,
-        period: cdk.Duration.minutes(1)
+        period: cdk.Duration.seconds(1)
       }),
       ]
     })
