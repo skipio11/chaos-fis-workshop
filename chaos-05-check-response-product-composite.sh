@@ -6,6 +6,8 @@ WORK_DIR_PATH=`cd ${SCRIPT_DIR_NAME}; pwd -P`
 
 . ${WORK_DIR_PATH}/chaos-env.sh
 
-curl http://Chaos-produ-WVT4FHV97CN9-1683737146.us-east-1.elb.amazonaws.com/product-composites/product-001 | jq .
+CHAOS_PRODUCT_COMPOSITE_ALB_DNS_NAME=`cat ${CDK_OUTPUT_FILE_CHAOS_ALL_STACK} | jq -r '.ChaosProductCompositeStack.productCompositeAlbDnsName'`
+echo "request to http://${CHAOS_PRODUCT_COMPOSITE_ALB_DNS_NAME}/product-composites/product-001"
+curl http://${CHAOS_PRODUCT_COMPOSITE_ALB_DNS_NAME}/product-composites/product-001 | jq .
 
 exit 0;
