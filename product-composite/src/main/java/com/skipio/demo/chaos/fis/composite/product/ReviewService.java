@@ -6,8 +6,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import org.apache.commons.lang.math.RandomUtils;
 
 @Service
 public class ReviewService {
@@ -17,9 +17,10 @@ public class ReviewService {
         this.restTemplate = restTemplate;
     }
 
-    @CircuitBreaker(name = "review", fallbackMethod = "fallback")
+    // @CircuitBreaker(name = "review", fallbackMethod = "fallback")
     public List<ProductComposite.Review> getReviews(String productId){
-        return restTemplate.exchange("http://review/products/"+productId+"/reviews", HttpMethod.GET, null, new ParameterizedTypeReference<List<ProductComposite.Review>>() {}).getBody();
+        List<ProductComposite.Review> reviews = restTemplate.exchange("http://review/products/"+productId+"/reviews", HttpMethod.GET, null, new ParameterizedTypeReference<List<ProductComposite.Review>>() {}).getBody();
+        return reviews;
     }
 
     public List<ProductComposite.Review> fallback(Exception e){
@@ -33,6 +34,17 @@ public class ReviewService {
         review.setSubject("fallback subject");
 
         reviews.add(review);
+        
+        sleep(50 + RandomUtils.nextInt(51));
+        
         return reviews;
+    }
+    
+    private void sleep(long milliseconds){
+        try {
+            Thread.sleep(milliseconds);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

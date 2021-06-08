@@ -1,14 +1,13 @@
 import * as cdk from '@aws-cdk/core';
-import * as ec2 from '@aws-cdk/aws-ec2';
 import * as elbv2 from '@aws-cdk/aws-elasticloadbalancingv2';
-import * as targets from '@aws-cdk/aws-elasticloadbalancingv2-targets';
 import * as iam from "@aws-cdk/aws-iam";
 import * as asg from "@aws-cdk/aws-autoscaling";
 import * as fis from "@aws-cdk/aws-fis";
 import * as cw from "@aws-cdk/aws-cloudwatch";
 
 interface ChaosFisStackProps extends cdk.StackProps {
-
+    productCompositeAlb: elbv2.ApplicationLoadBalancer,
+    productCompositeListenerTarget: elbv2.ApplicationTargetGroup
 }
 
 export class ChaosFisStack extends cdk.Stack {
@@ -25,14 +24,38 @@ export class ChaosFisStack extends cdk.Stack {
           ]
         }
     );
-    this.createFisTemplateForCPUAttack(fisRole);
-    this.createFisTemplateForInstanceTerminate(fisRole);
-    this.createFisTemplateForNetwork(fisRole);
+    const chaosSteadyStateAlarm = this.createChaosSteadyStateAlarm(props.productCompositeAlb.loadBalancerFullName, props.productCompositeListenerTarget.targetGroupFullName);
+    this.createFisTemplateForCPUAttack(fisRole, chaosSteadyStateAlarm);
+    this.createFisTemplateForInstanceTerminate(fisRole, chaosSteadyStateAlarm);
+    this.createFisTemplateForNetwork(fisRole, chaosSteadyStateAlarm);
   }
 
-  createFisTemplateForCPUAttack(fisRole: iam.Role) : void {
+    createChaosSteadyStateAlarm(albName: string, targetGroupName: string) : cw.Alarm {
+      const chaosSteadyStateAlarm = new cw.Alarm(this, 'chaosSteadyStateAlarm', {
+          alarmName: 'chaosSteadyStateAlarm',
+          metric: new cw.Metric({
+              metricName: 'TargetResponseTime',
+              namespace: 'AWS/ApplicationELB',
+              dimensions: {
+                  'LoadBalancer': albName,
+                  'TargetGroup': targetGroupName
+              },
+              statistic: 'p90',
+          }).with( {
+              period: cdk.Duration.seconds(60)
+          }),
+          threshold: 1,
+          evaluationPeriods: 2,
+          treatMissingData: cw.TreatMissingData.MISSING,
+          comparisonOperator: cw.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+          datapointsToAlarm: 2,
+      });
+
+      return chaosSteadyStateAlarm;
+  }
+
+  createFisTemplateForCPUAttack(fisRole: iam.Role, alarm: cw.Alarm) : void {
       const cpuAttackAction: fis.CfnExperimentTemplate.ExperimentTemplateActionProperty = {
-          // actionId: 'aws:ssm:send-command/AWSFIS-Run-CPU-Stress',
           actionId: 'aws:ssm:send-command',
           parameters: {
               documentArn: "arn:aws:ssm:us-east-1::document/AWSFIS-Run-CPU-Stress",
@@ -57,9 +80,10 @@ export class ChaosFisStack extends cdk.Stack {
       const cpuAttackTemplate = new fis.CfnExperimentTemplate(this,'cpuAttackTemplate', {
           description: 'CPU Attack Template',
           roleArn: fisRole.roleArn,
-          stopConditions: [
-              { source: 'none' }
-          ],
+          stopConditions: [{
+              source: 'aws:cloudwatch:alarm',
+              value: alarm.alarmArn
+          }],
           tags: {'Name': 'CPU Attack Template'},
           actions: {
               'CPU-Attack-Action' : cpuAttackAction
@@ -70,7 +94,7 @@ export class ChaosFisStack extends cdk.Stack {
       });
   };
 
-  createFisTemplateForInstanceTerminate(fisRole: iam.Role) : void {
+  createFisTemplateForInstanceTerminate(fisRole: iam.Role, alarm: cw.Alarm) : void {
       const terminateAttackAction: fis.CfnExperimentTemplate.ExperimentTemplateActionProperty = {
           actionId: 'aws:ec2:terminate-instances',
           parameters: {
@@ -93,9 +117,10 @@ export class ChaosFisStack extends cdk.Stack {
       const terminateAttackTemplate = new fis.CfnExperimentTemplate(this,'TerminateAttackTemplate', {
           description: 'Terminate Attack Template',
           roleArn: fisRole.roleArn,
-          stopConditions: [
-              { source: 'none' }
-          ],
+          stopConditions: [{
+              source: 'aws:cloudwatch:alarm',
+              value: alarm.alarmArn
+          }],
           tags: {'Name': 'Terminate Attack Template'},
           actions: {
               'Terminate-Attack-Action' : terminateAttackAction
@@ -106,7 +131,7 @@ export class ChaosFisStack extends cdk.Stack {
       });
   };
 
-  createFisTemplateForNetwork(fisRole: iam.Role) : void {
+  createFisTemplateForNetwork(fisRole: iam.Role, alarm: cw.Alarm) : void {
       const networkAttackAction: fis.CfnExperimentTemplate.ExperimentTemplateActionProperty = {
           actionId: 'aws:ssm:send-command',
           parameters: {
@@ -132,9 +157,10 @@ export class ChaosFisStack extends cdk.Stack {
       const networkAttackTemplate = new fis.CfnExperimentTemplate(this,'networkAttackTemplate', {
           description: 'Network Attack Template',
           roleArn: fisRole.roleArn,
-          stopConditions: [
-              { source: 'none' }
-          ],
+          stopConditions: [{
+              source: 'aws:cloudwatch:alarm',
+              value: alarm.alarmArn
+          }],
           tags: {'Name': 'Network Attack Template'},
           actions: {
               'Network-Attack-Action' : networkAttackAction

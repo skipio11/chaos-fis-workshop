@@ -60,7 +60,8 @@ export class ChaosRecommendationStack extends cdk.Stack {
         mkdir -p /root/xray/ && cd /root/xray && wget https://github.com/aws/aws-xray-java-agent/releases/latest/download/xray-agent.zip && unzip xray-agent.zip
         mkdir -p /root/log & mkdir -p /root/recommendation && cd /root/recommendation
         echo 'aws s3 cp s3://${props.chaosBucket.bucketName}/recommendation.jar  ./recommendation.jar' >> start.sh
-        echo 'java -jar -javaagent:/root/xray/disco/disco-java-agent.jar=pluginPath=/root/xray/disco/disco-plugins -Dcom.amazonaws.xray.strategy.tracingName=recommendation -Dspring.profiles.active=aws -Deureka.client.serviceUrl.defaultZone=http://${props.eurekaAlbDnsName}/eureka/ -Dlogging.file.path=/root/log recommendation.jar &' >> start.sh
+        #echo 'java -jar -javaagent:/root/xray/disco/disco-java-agent.jar=pluginPath=/root/xray/disco/disco-plugins -Dcom.amazonaws.xray.strategy.tracingName=recommendation -Dspring.profiles.active=aws -Deureka.client.serviceUrl.defaultZone=http://${props.eurekaAlbDnsName}/eureka/ -Dlogging.file.path=/root/log recommendation.jar &' >> start.sh
+        echo 'java -jar -Dspring.profiles.active=aws -Deureka.client.serviceUrl.defaultZone=http://${props.eurekaAlbDnsName}/eureka/ -Dlogging.file.path=/root/log recommendation.jar &' >> start.sh
         sh start.sh
       `)
     });

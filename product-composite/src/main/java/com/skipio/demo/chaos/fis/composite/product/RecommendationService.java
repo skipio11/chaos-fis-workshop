@@ -5,9 +5,8 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import org.apache.commons.lang.math.RandomUtils;
 
 @Service
 public class RecommendationService {
@@ -17,12 +16,13 @@ public class RecommendationService {
         this.restTemplate = restTemplate;
     }
 
-    @CircuitBreaker(name = "recommendation", fallbackMethod = "fallback")
+    // @CircuitBreaker(name = "recommendation", fallbackMethod = "fallback")
     public List<ProductComposite.Recommendation> getRecommendations(String productId){
-        return restTemplate.exchange("http://recommendation/products/"+productId+"/recommendations", HttpMethod.GET, null, new ParameterizedTypeReference<List<ProductComposite.Recommendation>>() {}).getBody();
+        List<ProductComposite.Recommendation> recommendations = restTemplate.exchange("http://recommendation/products/"+productId+"/recommendations", HttpMethod.GET, null, new ParameterizedTypeReference<List<ProductComposite.Recommendation>>() {}).getBody();
+        return recommendations;
     }
 
-    private List<ProductComposite.Recommendation> fallback(Exception e){
+    public List<ProductComposite.Recommendation> fallback(Exception e){
         List<ProductComposite.Recommendation> recommendations = new ArrayList<>();
         ProductComposite.Recommendation recommendation = new ProductComposite.Recommendation();
         recommendation.setAuthor("fallback author");
@@ -32,7 +32,17 @@ public class RecommendationService {
         recommendation.setRecommendationId("fallback recommendationId");
 
         recommendations.add(recommendation);
-
+        
+        sleep(50 + RandomUtils.nextInt(51));
+        
         return recommendations;
+    }
+    
+    private void sleep(long milliseconds){
+        try {
+            Thread.sleep(milliseconds);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

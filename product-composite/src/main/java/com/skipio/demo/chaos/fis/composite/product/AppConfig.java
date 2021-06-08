@@ -6,7 +6,6 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
@@ -26,7 +25,6 @@ public class AppConfig {
         return clientHttpRequestFactory;
     }
 
-    @Profile("default")
     @Bean
     public CloseableHttpClient defaultHttpClient() {
         PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
@@ -35,9 +33,9 @@ public class AppConfig {
 
         RequestConfig requestConfig = RequestConfig
                 .custom()
-                .setConnectionRequestTimeout(5000) // timeout to get connection from pool
-                .setSocketTimeout(5000) // standard connection timeout
-                .setConnectTimeout(5000) // standard connection timeout
+                .setConnectionRequestTimeout(10000) // timeout to get connection from pool
+                .setSocketTimeout(10000) // standard connection timeout
+                .setConnectTimeout(10000) // standard connection timeout
                 .build();
         return org.apache.http.impl.client.HttpClientBuilder.create()
                 .setConnectionManager(connectionManager)
@@ -45,6 +43,7 @@ public class AppConfig {
                 .build();
     }
 
+    /*
     @Profile("aws")
     @Bean
     public CloseableHttpClient xRayHttpClient() {
@@ -54,9 +53,9 @@ public class AppConfig {
 
         RequestConfig requestConfig = RequestConfig
                 .custom()
-                .setConnectionRequestTimeout(5000) // timeout to get connection from pool
-                .setSocketTimeout(5000) // standard connection timeout
-                .setConnectTimeout(5000) // standard connection timeout
+                .setConnectionRequestTimeout(3000) // timeout to get connection from pool
+                .setSocketTimeout(3000) // standard connection timeout
+                .setConnectTimeout(3000) // standard connection timeout
                 .build();
 
         return com.amazonaws.xray.proxies.apache.http.HttpClientBuilder.create()
@@ -64,4 +63,5 @@ public class AppConfig {
                 .setDefaultRequestConfig(requestConfig)
                 .build();
     }
+    */
 }

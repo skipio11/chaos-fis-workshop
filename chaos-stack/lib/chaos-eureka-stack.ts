@@ -62,7 +62,8 @@ export class ChaosEurekaStack extends cdk.Stack {
         mkdir -p /root/xray/ && cd /root/xray && wget https://github.com/aws/aws-xray-java-agent/releases/latest/download/xray-agent.zip && unzip xray-agent.zip
         mkdir -p /root/log & mkdir -p /root/eureka && cd /root/eureka
         echo 'aws s3 cp s3://${props.chaosBucket.bucketName}/eureka.jar ./eureka.jar' >> start.sh
-        echo 'java -jar -javaagent:/root/xray/disco/disco-java-agent.jar=pluginPath=/root/xray/disco/disco-plugins -Dcom.amazonaws.xray.strategy.tracingName=eureka -Dspring.profiles.active=aws -Dlogging.file.path=/root/log eureka.jar &' >> start.sh
+        #echo 'java -jar -javaagent:/root/xray/disco/disco-java-agent.jar=pluginPath=/root/xray/disco/disco-plugins -Dcom.amazonaws.xray.strategy.tracingName=eureka -Dspring.profiles.active=aws -Dlogging.file.path=/root/log eureka.jar &' >> start.sh
+        echo 'java -jar -Dspring.profiles.active=aws -Dlogging.file.path=/root/log eureka.jar &' >> start.sh
         sh start.sh
       `),
     });
