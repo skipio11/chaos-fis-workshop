@@ -58,7 +58,7 @@ export class ChaosFisStack extends cdk.Stack {
       const cpuAttackAction: fis.CfnExperimentTemplate.ExperimentTemplateActionProperty = {
           actionId: 'aws:ssm:send-command',
           parameters: {
-              documentArn: "arn:aws:ssm:us-east-1::document/AWSFIS-Run-CPU-Stress",
+              documentArn: "arn:aws:ssm:" + process.env.CDK_DEFAULT_REGION + "::document/AWSFIS-Run-CPU-Stress",
               documentParameters: "{\"DurationSeconds\":\"300\", \"InstallDependencies\":\"True\"}",
               duration: 'PT5M',
           },
